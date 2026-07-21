@@ -1,5 +1,7 @@
 # The Peak Garden website and authentication service
 
+Hướng dẫn triển khai chi tiết bằng tiếng Việt dành cho đơn vị hosting: [HUONG_DAN_TRIEN_KHAI_VI.md](HUONG_DAN_TRIEN_KHAI_VI.md).
+
 This repository contains the existing The Peak Garden static marketing website plus a Go authentication service. The service serves the website and provides email/password signup, login, current-session, and logout APIs backed by PostgreSQL.
 
 ## What was added
