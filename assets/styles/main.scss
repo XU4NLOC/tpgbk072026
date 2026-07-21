@@ -122,9 +122,17 @@ background: #004951;
     }
     .item-link-lang {
         text-align: right;
-        float: right;
+		position: static;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		flex: 0 0 auto;
+		gap: 12px;
+		margin-left: 16px;
+		padding-left: 16px;
+		border-left: 1px solid rgba(208, 176, 106, .45);
         div {
-            position: absolute;
+	            position: static;
             display: flex;
             top: 0;
             right: -35px;
@@ -145,6 +153,14 @@ background: #004951;
                 color: #9fc0c4;
             }
         }
+		> .header-language,
+		> .auth-header,
+		.auth-account {
+			position: static;
+		}
+		.auth-header {
+			margin-top: 0;
+		}
     }
     .main-nav.nav-left {
         text-align: right;
@@ -153,6 +169,19 @@ background: #004951;
     nav.main-nav.nav-right {
         text-align: left;
         position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		white-space: nowrap;
+		> ul {
+			display: flex;
+			align-items: center;
+			flex: 0 1 auto;
+		}
+		> ul li a {
+			padding-left: 12px;
+			padding-right: 12px;
+		}
     }
     .main-nav-center {
         min-width: 120px;
@@ -187,6 +216,7 @@ background: #004951;
         }
     }
 }
+
 }
 
 .item-bannerm {
@@ -1089,6 +1119,9 @@ background: #f9f9f9;
             display: flex;
             align-items: center;
             .menu-lang {
+				display: flex;
+				align-items: center;
+				white-space: nowrap;
                 margin-right: 20px;
                 .lang-mobile {
                     color: #9fc0c4;
@@ -1496,5 +1529,30 @@ background: #f9f9f9;
     display: block;
 }
 
-
-
+/* Authentication styles live unminified in main.css so this legacy SCSS build is optional. */
+@media (max-width: 480px) {
+	.wrapper-mobile-f { padding: 8px 12px; }
+	.d-flex-mob .item.f-logo-mob a img {
+		max-width: 115px;
+		max-height: 62px;
+	}
+	.d-flex-mob .item-menu .menu-lang {
+		gap: 7px;
+		margin-right: 12px;
+	}
+	.d-flex-mob .item-menu .menu-lang .lang-mobile {
+		font-size: 18px;
+		line-height: 1;
+	}
+	.auth-trigger-mobile {
+		margin-left: 0;
+		padding: 4px 8px;
+		white-space: nowrap;
+	}
+	.auth-account-mobile {
+		gap: 5px;
+		margin-left: 0;
+	}
+	.auth-account-mobile span { display: none; }
+	.d-flex-mob .item-menu .menu-ico #menu-open-mob i { font-size: 26px; }
+}

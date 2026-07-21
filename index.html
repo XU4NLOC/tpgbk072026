@@ -67,6 +67,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                         <a href="javascript:void(0);" class="lang-mobile">
                                             
                                         </a>
+                                        <button type="button" class="auth-trigger auth-trigger-mobile" data-auth-open>Đăng nhập</button>
+                                        <div class="auth-account auth-account-mobile" data-auth-account hidden>
+                                            <span data-auth-email></span>
+                                            <button type="button" data-auth-logout>Đăng xuất</button>
+                                        </div>
                                     </div>
                                     <div class="menu-ico sub-head">
                                         <a href="javascript:void(0)" id="menu-open-mob" class="snav-btn">
@@ -111,8 +116,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                         
                                     </ul>
                                     <div class="item-link-lang">
-                                        <div>
+                                        <div class="header-language">
                                             <a class="lang__vi" href="javascript:void(0);">VI</a><span>|</span><a class="lang__en" href="javascript:void(0);">EN</a>
+                                        </div>
+                                        <div class="auth-header">
+                                            <button type="button" class="auth-trigger" data-auth-open>Đăng nhập</button>
+                                            <div class="auth-account" data-auth-account hidden>
+                                                <span data-auth-email></span>
+                                                <button type="button" data-auth-logout>Đăng xuất</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </nav>
@@ -790,6 +802,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
             </a>
         </div>
+        <div class="auth-modal" data-auth-modal hidden>
+            <div class="auth-modal__backdrop" data-auth-close></div>
+            <section class="auth-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+                <button type="button" class="auth-card__close" data-auth-close aria-label="Đóng">&times;</button>
+                <img class="auth-card__logo" src="./assets/images/logo/artboard-12.png" alt="The Peak Garden">
+                <h2 id="auth-title">Đăng nhập</h2>
+                <p class="auth-card__intro" data-auth-intro>Đăng nhập để truy cập tài khoản The Peak Garden của bạn.</p>
+                <div class="auth-tabs" role="tablist">
+                    <button type="button" class="active" data-auth-tab="login" role="tab">Đăng nhập</button>
+                    <button type="button" data-auth-tab="signup" role="tab">Đăng ký</button>
+                </div>
+                <form data-auth-form novalidate>
+                    <label for="auth-email">Email</label>
+                    <input id="auth-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+                    <label for="auth-password">Mật khẩu</label>
+                    <div class="auth-password">
+                        <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="72" required>
+                        <button type="button" data-password-toggle aria-label="Hiện mật khẩu">Hiện</button>
+                    </div>
+                    <p class="auth-password-help" data-password-help hidden>Mật khẩu phải có từ 12 đến 72 ký tự.</p>
+                    <p class="auth-message" data-auth-message role="alert" aria-live="polite"></p>
+                    <button type="submit" class="auth-submit">Đăng nhập</button>
+                </form>
+            </section>
+        </div>
         <script src="./assets/script/jquery.min.1.11.0.js"></script>
         <link  href="https://cdnjs.cloudflare.com/ajax/libs/fotorama/4.6.4/fotorama.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fotorama/4.6.4/fotorama.js"></script>
@@ -799,8 +836,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <script src="./assets/script/main.js"></script>
         <script src="./assets/script/index-cus.js"></script>
         <script src="./assets/script/font.js"></script>
+        <script src="./assets/script/auth.js"></script>
 
     </body>
     </html>
-
-
