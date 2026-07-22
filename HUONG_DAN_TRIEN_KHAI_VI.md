@@ -601,3 +601,8 @@ Hãy gửi:
 6. Phiên bản mã nguồn/binary đang triển khai.
 
 Hãy che mật khẩu, cookie, chuỗi kết nối cơ sở dữ liệu và dữ liệu cá nhân trước khi gửi log.
+# Lưu ý: tài liệu cũ
+
+Tài liệu này mô tả phương án PostgreSQL/hosting truyền thống trước đây và không
+còn áp dụng cho phiên bản hiện tại. Xem `FIREBASE_DEPLOY.md` để triển khai Go lên
+Cloud Run, website lên Firebase Hosting và lưu dữ liệu trong Firestore.

@@ -1,5 +1,5 @@
-.env
 *.log
+.env
 .DS_Store
 thepeakgarden-server
 coverage.out

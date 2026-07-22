@@ -9,8 +9,7 @@ import (
 
 type Config struct {
 	Address       string
-	DatabaseURL   string
-	StaticDir     string
+	ProjectID     string
 	CookieSecure  bool
 	AllowedOrigin string
 	SessionTTL    time.Duration
@@ -20,14 +19,13 @@ type Config struct {
 func LoadConfig() (Config, error) {
 	cfg := Config{
 		Address:       envOr("ADDRESS", ":8080"),
-		DatabaseURL:   os.Getenv("DATABASE_URL"),
-		StaticDir:     envOr("STATIC_DIR", "."),
+		ProjectID:     envOr("FIREBASE_PROJECT_ID", envOr("GOOGLE_CLOUD_PROJECT", os.Getenv("GCLOUD_PROJECT"))),
 		AllowedOrigin: os.Getenv("ALLOWED_ORIGIN"),
 		SessionTTL:    7 * 24 * time.Hour,
 		BcryptCost:    12,
 	}
-	if cfg.DatabaseURL == "" {
-		return Config{}, fmt.Errorf("DATABASE_URL is required")
+	if cfg.ProjectID == "" {
+		return Config{}, fmt.Errorf("FIREBASE_PROJECT_ID is required")
 	}
 	var err error
 	if raw := os.Getenv("COOKIE_SECURE"); raw != "" {

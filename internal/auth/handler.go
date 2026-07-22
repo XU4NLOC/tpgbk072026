@@ -17,12 +17,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	sessionCookie = "tpg_session"
+	// Firebase Hosting forwards only the reserved __session cookie to dynamic
+	// rewrites such as Cloud Run.
+	sessionCookie = "__session"
 	maxBodyBytes  = 16 << 10
 )
 
@@ -45,23 +46,36 @@ func NewHandler(store Store, cfg Config) *Handler {
 	return &Handler{store: store, config: cfg, now: time.Now, limiter: newLoginLimiter(8, 15*time.Minute), dummyHash: dummyHash}
 }
 
-func (h *Handler) Routes(staticDir string) http.Handler {
+func (h *Handler) Routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/auth/signup", h.signup)
 	mux.HandleFunc("POST /api/auth/login", h.login)
 	mux.HandleFunc("POST /api/auth/logout", h.logout)
 	mux.HandleFunc("GET /api/auth/me", h.me)
-	files := http.FileServer(http.Dir(staticDir))
-	mux.Handle("GET /assets/", files)
-	mux.Handle("GET /images/", files)
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
+	return securityHeaders(h.cors(mux))
+}
+
+func (h *Handler) cors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
+		if strings.HasPrefix(r.URL.Path, "/api/") && origin != "" {
+			if !h.validOrigin(r) {
+				writeError(w, http.StatusForbidden, "invalid request origin")
+				return
+			}
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Add("Vary", "Origin")
+			if r.Method == http.MethodOptions {
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+				w.Header().Set("Access-Control-Max-Age", "3600")
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
 		}
-		http.ServeFile(w, r, staticDir+"/index.html")
+		next.ServeHTTP(w, r)
 	})
-	return securityHeaders(mux)
 }
 
 type credentials struct {
@@ -174,7 +188,7 @@ func (h *Handler) me(w http.ResponseWriter, r *http.Request) {
 	}
 	hash := sha256.Sum256([]byte(token))
 	user, err := h.store.UserBySession(r.Context(), hash[:], h.now())
-	if errors.Is(err, pgx.ErrNoRows) {
+	if errors.Is(err, ErrNotFound) {
 		h.clearCookie(w)
 		writeError(w, http.StatusUnauthorized, "not authenticated")
 		return

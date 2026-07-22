@@ -10,8 +10,6 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type memorySession struct {
@@ -37,7 +35,7 @@ func (s *memoryStore) CreateUser(_ context.Context, email, hash string) (User, e
 func (s *memoryStore) UserByEmail(_ context.Context, email string) (User, error) {
 	u, ok := s.users[email]
 	if !ok {
-		return User{}, pgx.ErrNoRows
+		return User{}, ErrNotFound
 	}
 	return u, nil
 }
@@ -52,14 +50,14 @@ func (s *memoryStore) UserBySession(_ context.Context, hash []byte, now time.Tim
 	copy(key[:], hash)
 	session, ok := s.sessions[key]
 	if !ok || !session.expires.After(now) {
-		return User{}, pgx.ErrNoRows
+		return User{}, ErrNotFound
 	}
 	for _, u := range s.users {
 		if u.ID == session.userID {
 			return u, nil
 		}
 	}
-	return User{}, pgx.ErrNoRows
+	return User{}, ErrNotFound
 }
 func (s *memoryStore) DeleteSession(_ context.Context, hash []byte) error {
 	var key [32]byte
@@ -69,7 +67,7 @@ func (s *memoryStore) DeleteSession(_ context.Context, hash []byte) error {
 }
 
 func testHandler(store Store) http.Handler {
-	return NewHandler(store, Config{SessionTTL: time.Hour, BcryptCost: 4, AllowedOrigin: "https://example.com", CookieSecure: true}).Routes("../..")
+	return NewHandler(store, Config{SessionTTL: time.Hour, BcryptCost: 4, AllowedOrigin: "https://example.com", CookieSecure: true}).Routes()
 }
 
 func jsonRequest(t *testing.T, handler http.Handler, method, path string, body any, cookie *http.Cookie) *httptest.ResponseRecorder {
@@ -150,9 +148,28 @@ func TestRejectsCrossSiteMutation(t *testing.T) {
 	}
 }
 
-func TestStaticServerDoesNotExposeSourceFiles(t *testing.T) {
+func TestCORSPreflight(t *testing.T) {
 	handler := testHandler(newMemoryStore())
-	for _, path := range []string{"/go.mod", "/.env", "/internal/auth/handler.go"} {
+	req := httptest.NewRequest(http.MethodOptions, "/api/auth/login", nil)
+	req.Header.Set("Origin", "https://example.com")
+	req.Header.Set("Access-Control-Request-Method", http.MethodPost)
+	req.Header.Set("Access-Control-Request-Headers", "content-type")
+	res := httptest.NewRecorder()
+	handler.ServeHTTP(res, req)
+	if res.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, body = %s", res.Code, res.Body.String())
+	}
+	if got := res.Header().Get("Access-Control-Allow-Origin"); got != "https://example.com" {
+		t.Fatalf("allow origin = %q", got)
+	}
+	if got := res.Header().Get("Access-Control-Allow-Credentials"); got != "true" {
+		t.Fatalf("allow credentials = %q", got)
+	}
+}
+
+func TestBackendDoesNotServeFrontendOrSourceFiles(t *testing.T) {
+	handler := testHandler(newMemoryStore())
+	for _, path := range []string{"/", "/index.html", "/assets/script/auth.js", "/images/thumbnail.jpg", "/go.mod", "/.env", "/internal/auth/handler.go"} {
 		res := httptest.NewRecorder()
 		handler.ServeHTTP(res, httptest.NewRequest(http.MethodGet, path, nil))
 		if res.Code != http.StatusNotFound {

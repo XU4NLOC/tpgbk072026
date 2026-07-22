@@ -19,20 +19,16 @@ func main() {
 	}
 
 	ctx := context.Background()
-	store, err := auth.NewPostgresStore(ctx, cfg.DatabaseURL)
+	store, err := auth.NewFirestoreStore(ctx, cfg.ProjectID)
 	if err != nil {
 		log.Fatalf("connect to database: %v", err)
 	}
-	defer store.Close()
-
-	if err := store.Migrate(ctx); err != nil {
-		log.Fatalf("run database migrations: %v", err)
-	}
+	defer func() { _ = store.Close() }()
 
 	handler := auth.NewHandler(store, cfg)
 	server := &http.Server{
 		Addr:              cfg.Address,
-		Handler:           handler.Routes(cfg.StaticDir),
+		Handler:           handler.Routes(),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,

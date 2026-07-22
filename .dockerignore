@@ -1,0 +1,12 @@
+.git
+.env
+*.log
+demo
+domains
+cgi-bin
+assets
+images
+index.html
+index-bk.html
+index.html.moved
+thepeakgarden-server
